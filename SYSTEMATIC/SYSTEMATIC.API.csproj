@@ -10,4 +10,8 @@
     <Folder Include="Controllers\" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\SYSTEMATIC.DB\SYSTEMATIC.DB.csproj" />
+  </ItemGroup>
+
 </Project>
