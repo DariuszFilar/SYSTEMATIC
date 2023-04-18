@@ -1,6 +1,6 @@
 ﻿namespace SYSTEMATIC.INFRASTRUCTURE.Services
 {
-    public class AccountService
+    public interface AccountService
     {
     }
 }
