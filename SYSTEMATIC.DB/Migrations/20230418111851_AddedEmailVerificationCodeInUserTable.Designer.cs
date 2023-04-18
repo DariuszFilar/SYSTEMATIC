@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using SYSTEMATIC.DB;
 
@@ -10,9 +11,10 @@ using SYSTEMATIC.DB;
 namespace SYSTEMATIC.DB.Migrations
 {
     [DbContext(typeof(SystematicDbContext))]
-    partial class SystematicDbContextModelSnapshot : ModelSnapshot
+    [Migration("20230418111851_AddedEmailVerificationCodeInUserTable")]
+    partial class AddedEmailVerificationCodeInUserTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
