@@ -5,6 +5,8 @@ using SYSTEMATIC.API.Controllers;
 using SYSTEMATIC.API.Handlers.Commands;
 using SYSTEMATIC.DB;
 using SYSTEMATIC.DB.Entities;
+using SYSTEMATIC.INFRASTRUCTURE.Repositories.Abstract;
+using SYSTEMATIC.INFRASTRUCTURE.Repositories.Concrete;
 using SYSTEMATIC.INFRASTRUCTURE.Requests;
 using SYSTEMATIC.INFRASTRUCTURE.Responses;
 using SYSTEMATIC.INFRASTRUCTURE.Services;
@@ -46,6 +48,8 @@ builder.Services.AddDbContext<SystematicDbContext>();
 builder.Services.AddScoped<IAccountService, AccountService>();
 builder.Services.AddScoped<IRequestHandler<RegisterUserRequest, RegisterUserResponse>, RegisterUserHandler>();
 builder.Services.AddScoped<IAccountService, AccountService>();
+builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
+builder.Services.AddScoped<IUserRepository, UserRepository>();
 
 builder.Services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
 
