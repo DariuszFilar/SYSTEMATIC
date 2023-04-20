@@ -9,17 +9,33 @@ namespace SYSTEMATIC.API.Controllers
     [Route("[controller]")]
     public class AccountController : ControllerBase
     {
-        private readonly IRequestHandler<RegisterUserRequest, RegisterUserResponse> _handler;
+        private readonly IRequestHandler<RegisterUserRequest, RegisterUserResponse> _registerHandler;
+        private readonly IRequestHandler<VerifyEmailCodeRequest, VerifyEmailCodeResponse> _verifyEmailCodeHandler;
 
-        public AccountController(IRequestHandler<RegisterUserRequest, RegisterUserResponse> handler)
+        public AccountController(IRequestHandler<RegisterUserRequest, 
+            RegisterUserResponse> registerHandler,
+            IRequestHandler<VerifyEmailCodeRequest, VerifyEmailCodeResponse> verifyEmailCodeHandler)
         {
-            _handler = handler;
+            _registerHandler = registerHandler;
+            _verifyEmailCodeHandler = verifyEmailCodeHandler;
         }
 
         [HttpPost("register")]
         public async Task<IActionResult> Register(RegisterUserRequest request)
         {
-            var response = await _handler.Handle(request);
+            var response = await _registerHandler.Handle(request);
+            return Ok(response);
+        }
+
+        [HttpPost("verify-email/{verificationCode}")]
+        public async Task<IActionResult> VerifyEmail([FromRoute]string verificationCode)
+        {
+            var request = new VerifyEmailCodeRequest 
+            { 
+                EmailVerificationCode = verificationCode 
+            };
+
+            var response = await _verifyEmailCodeHandler.Handle(request);
             return Ok(response);
         }
     }

@@ -52,6 +52,23 @@ namespace SYSTEMATIC.INFRASTRUCTURE.Services
             return Convert.ToBase64String(randomBytes);
         }
 
+        public async Task<bool> VerifyEmailCodeAsync(VerifyEmailCodeRequest request)
+        {
+            var user = await _userRepository.GetByEmailVerificationCodeAsync(request.EmailVerificationCode) ?? throw new Exception();
+
+            if (user.EmailVerificationCodeExpireAt.Value <= DateTime.UtcNow.AddMinutes(_appSettings.EmailVerificationCodeExpirationDays))
+            {
+                throw new Exception();
+            }
+
+            user.EmailVerificationCode = null;
+            user.EmailVerificationCodeExpireAt = null;
+
+            await _userRepository.UpdateAsync(user);
+
+            return true;
+        }
+
         private string HashPassword(string password, string salt)
         {
             return _passwordHasher.HashPassword(null, password + salt);

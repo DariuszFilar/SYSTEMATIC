@@ -44,15 +44,17 @@ builder.Services.AddSwaggerGen(c =>
 });
 
 builder.Services.AddControllers();
+
 builder.Services.AddDbContext<SystematicDbContext>();
+
 builder.Services.AddOptions();
 builder.Services.Configure<AppSettings>(builder.Configuration.GetSection("AppSettings"));
 builder.Services.AddScoped(sp =>
     sp.GetRequiredService<IOptions<AppSettings>>().Value);
+
 builder.Services.AddScoped<IAccountService, AccountService>();
 builder.Services.AddScoped<IRequestHandler<RegisterUserRequest, RegisterUserResponse>, RegisterUserHandler>();
-builder.Services.AddScoped<IAccountService, AccountService>();
-builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
+builder.Services.AddScoped<IRequestHandler<VerifyEmailCodeRequest, VerifyEmailCodeResponse>, VerifyEmailCodeHandler>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 
 builder.Services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
@@ -68,6 +70,8 @@ app.UseSwaggerUI(c =>
 {
     c.SwaggerEndpoint("/swagger/v1/swagger.json", "Restaurant API");
 });
+
+app.UseHttpsRedirection();
 
 app.UseRouting();
 
