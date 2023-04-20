@@ -8,6 +8,6 @@
         public string PasswordSalt { get; set; }
         public string Email { get; set; }
         public string EmailVerificationCode { get; set; }
-        public DateTime EmailVerificationCodeSendAt { get; set; }
+        public DateTime EmailVerificationCodeExpireAt { get; set; }
     }
 }
