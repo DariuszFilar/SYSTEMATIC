@@ -62,7 +62,7 @@ namespace SYSTEMATIC.TESTS
             await accountService.RegisterUserAsync(request);
 
             // Assert
-            mockUserRepository.Verify(x => x.AddAsync(It.Is<User>(u => u.EmailVerificationCodeExpireAt.Date == DateTime.UtcNow.AddDays(7).Date)), Times.Once);
+            mockUserRepository.Verify(x => x.AddAsync(It.Is<User>(u => u.EmailVerificationCodeExpireAt.Value.Date == DateTime.UtcNow.AddDays(7).Date)), Times.Once);
         }
     }
 }
