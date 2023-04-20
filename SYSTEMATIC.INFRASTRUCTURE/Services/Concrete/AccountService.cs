@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using System.Security.Cryptography;
 using SYSTEMATIC.DB.Entities;
+using SYSTEMATIC.INFRASTRUCTURE.Exceptions;
 using SYSTEMATIC.INFRASTRUCTURE.Repositories.Abstract;
 using SYSTEMATIC.INFRASTRUCTURE.Requests;
 
@@ -54,11 +55,11 @@ namespace SYSTEMATIC.INFRASTRUCTURE.Services
 
         public async Task<bool> VerifyEmailCodeAsync(VerifyEmailCodeRequest request)
         {
-            var user = await _userRepository.GetByEmailVerificationCodeAsync(request.EmailVerificationCode) ?? throw new Exception();
+            var user = await _userRepository.GetByEmailVerificationCodeAsync(request.EmailVerificationCode) ?? throw new NotFoundException("User not found");
 
-            if (user.EmailVerificationCodeExpireAt.Value <= DateTime.UtcNow.AddMinutes(_appSettings.EmailVerificationCodeExpirationDays))
+            if (user.EmailVerificationCodeExpireAt.Value <= DateTime.UtcNow)
             {
-                throw new Exception();
+                throw new ExpiredException("Email verification code is expired");
             }
 
             user.EmailVerificationCode = null;

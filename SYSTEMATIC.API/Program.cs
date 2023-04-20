@@ -5,6 +5,7 @@ using SYSTEMATIC.API.Handlers.Commands;
 using SYSTEMATIC.DB;
 using SYSTEMATIC.DB.Entities;
 using SYSTEMATIC.INFRASTRUCTURE;
+using SYSTEMATIC.INFRASTRUCTURE.Middleware;
 using SYSTEMATIC.INFRASTRUCTURE.Repositories.Abstract;
 using SYSTEMATIC.INFRASTRUCTURE.Repositories.Concrete;
 using SYSTEMATIC.INFRASTRUCTURE.Requests;
@@ -53,6 +54,7 @@ builder.Services.AddScoped(sp =>
     sp.GetRequiredService<IOptions<AppSettings>>().Value);
 
 builder.Services.AddScoped<IAccountService, AccountService>();
+builder.Services.AddScoped<ErrorHandlingMiddleware>();
 builder.Services.AddScoped<IRequestHandler<RegisterUserRequest, RegisterUserResponse>, RegisterUserHandler>();
 builder.Services.AddScoped<IRequestHandler<VerifyEmailCodeRequest, VerifyEmailCodeResponse>, VerifyEmailCodeHandler>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
@@ -61,6 +63,7 @@ builder.Services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
 
 var app = builder.Build();
 
+app.UseMiddleware<ErrorHandlingMiddleware>();
 // Configure the HTTP request pipeline.
 
 app.UseHttpsRedirection();
