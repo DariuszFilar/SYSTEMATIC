@@ -1,3 +1,5 @@
+using FluentValidation;
+using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Options;
 using Microsoft.OpenApi.Models;
@@ -11,6 +13,7 @@ using SYSTEMATIC.INFRASTRUCTURE.Repositories.Concrete;
 using SYSTEMATIC.INFRASTRUCTURE.Requests;
 using SYSTEMATIC.INFRASTRUCTURE.Responses;
 using SYSTEMATIC.INFRASTRUCTURE.Services;
+using SYSTEMATIC.INFRASTRUCTURE.Validators;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -45,7 +48,7 @@ builder.Services.AddSwaggerGen(c =>
 });
 
 builder.Services.AddControllers();
-
+builder.Services.AddFluentValidationAutoValidation().AddFluentValidationClientsideAdapters();
 builder.Services.AddDbContext<SystematicDbContext>();
 
 builder.Services.AddOptions();
@@ -53,6 +56,7 @@ builder.Services.Configure<AppSettings>(builder.Configuration.GetSection("AppSet
 builder.Services.AddScoped(sp =>
     sp.GetRequiredService<IOptions<AppSettings>>().Value);
 
+builder.Services.AddTransient<IValidator<RegisterUserRequest>, RegisterUserRequestValidator>();
 builder.Services.AddScoped<IAccountService, AccountService>();
 builder.Services.AddScoped<ErrorHandlingMiddleware>();
 builder.Services.AddScoped<IRequestHandler<RegisterUserRequest, RegisterUserResponse>, RegisterUserHandler>();
