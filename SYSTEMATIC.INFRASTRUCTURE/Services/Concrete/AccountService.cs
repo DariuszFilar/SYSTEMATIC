@@ -10,11 +10,14 @@ namespace SYSTEMATIC.INFRASTRUCTURE.Services
     {
         private readonly IUserRepository _userRepository;
         private readonly IPasswordHasher<User> _passwordHasher;
+        private readonly AppSettings _appSettings;
         public AccountService(IUserRepository userRepository,
-            IPasswordHasher<User> passwordHasher)
+            IPasswordHasher<User> passwordHasher,
+            AppSettings appSettings)
         {
             _userRepository = userRepository;
             _passwordHasher = passwordHasher;
+            _appSettings = appSettings;
         }
         public async Task RegisterUserAsync(RegisterUserRequest request)
         {
@@ -28,6 +31,12 @@ namespace SYSTEMATIC.INFRASTRUCTURE.Services
 
             newUser.PasswordHash = hashedPassword;
             newUser.PasswordSalt = salt;
+
+            var emailVerificationCode = GenerateEmailVerificationCode();
+            newUser.EmailVerificationCode = emailVerificationCode;
+
+            var emailVerificationCodeExpireAt = DateTime.UtcNow.AddDays(_appSettings.EmailVerificationCodeExpirationDays);
+            newUser.EmailVerificationCodeExpireAt = emailVerificationCodeExpireAt;
 
             await _userRepository.AddAsync(newUser);
         }
@@ -46,6 +55,12 @@ namespace SYSTEMATIC.INFRASTRUCTURE.Services
         private string HashPassword(string password, string salt)
         {
             return _passwordHasher.HashPassword(null, password + salt);
+        }
+
+        private static string GenerateEmailVerificationCode()
+        {
+            var emailVerificationCode = Guid.NewGuid().ToString();
+            return emailVerificationCode;
         }
     }
 }
