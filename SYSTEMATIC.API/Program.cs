@@ -1,10 +1,10 @@
-using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Options;
 using Microsoft.OpenApi.Models;
-using SYSTEMATIC.API.Controllers;
 using SYSTEMATIC.API.Handlers.Commands;
 using SYSTEMATIC.DB;
 using SYSTEMATIC.DB.Entities;
+using SYSTEMATIC.INFRASTRUCTURE;
 using SYSTEMATIC.INFRASTRUCTURE.Repositories.Abstract;
 using SYSTEMATIC.INFRASTRUCTURE.Repositories.Concrete;
 using SYSTEMATIC.INFRASTRUCTURE.Requests;
@@ -45,6 +45,10 @@ builder.Services.AddSwaggerGen(c =>
 
 builder.Services.AddControllers();
 builder.Services.AddDbContext<SystematicDbContext>();
+builder.Services.AddOptions();
+builder.Services.Configure<AppSettings>(builder.Configuration.GetSection("AppSettings"));
+builder.Services.AddScoped(sp =>
+    sp.GetRequiredService<IOptions<AppSettings>>().Value);
 builder.Services.AddScoped<IAccountService, AccountService>();
 builder.Services.AddScoped<IRequestHandler<RegisterUserRequest, RegisterUserResponse>, RegisterUserHandler>();
 builder.Services.AddScoped<IAccountService, AccountService>();
