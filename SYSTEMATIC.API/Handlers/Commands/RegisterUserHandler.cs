@@ -5,19 +5,19 @@ using SYSTEMATIC.INFRASTRUCTURE.Services;
 namespace SYSTEMATIC.API.Handlers.Commands
 {
     public class RegisterUserHandler : IRequestHandler<RegisterUserRequest, RegisterUserResponse>
-{
-    private readonly IAccountService _accountService;
-
-    public RegisterUserHandler(IAccountService accountService)
     {
-        _accountService = accountService;
-    }
+        private readonly IAccountService _accountService;
 
-    public async Task<RegisterUserResponse> Handle(RegisterUserRequest request)
-    {
-        await _accountService.RegisterUserAsync(request);
+        public RegisterUserHandler(IAccountService accountService)
+        {
+            _accountService = accountService;
+        }
 
-        return new RegisterUserResponse();
+        public async Task<RegisterUserResponse> Handle(RegisterUserRequest request)
+        {
+            await _accountService.RegisterUserAsync(request);
+
+            return new RegisterUserResponse();
+        }
     }
-}
 }

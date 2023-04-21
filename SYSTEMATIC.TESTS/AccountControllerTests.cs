@@ -6,6 +6,8 @@ using SYSTEMATIC.INFRASTRUCTURE.Repositories.Abstract;
 using SYSTEMATIC.INFRASTRUCTURE;
 using SYSTEMATIC.INFRASTRUCTURE.Services;
 using SYSTEMATIC.INFRASTRUCTURE.Requests;
+using SYSTEMATIC.INFRASTRUCTURE.Validators;
+using FluentValidation.TestHelper;
 
 namespace SYSTEMATIC.TESTS
 {
@@ -15,6 +17,7 @@ namespace SYSTEMATIC.TESTS
         private Mock<IPasswordHasher<User>> mockPasswordHasher;
         private Mock<IOptions<AppSettings>> mockAppSettings;
         private AccountService accountService;
+        private RegisterUserRequestValidator _registerUserRequestValidator;
 
         [SetUp]
         public void Setup()
@@ -22,6 +25,7 @@ namespace SYSTEMATIC.TESTS
             mockUserRepository = new Mock<IUserRepository>();
             mockPasswordHasher = new Mock<IPasswordHasher<User>>();
             mockAppSettings = new Mock<IOptions<AppSettings>>();
+            _registerUserRequestValidator = new RegisterUserRequestValidator();
 
             mockAppSettings.Setup(x => x.Value).Returns(new AppSettings
             {
@@ -29,6 +33,24 @@ namespace SYSTEMATIC.TESTS
             });
 
             accountService = new AccountService(mockUserRepository.Object, mockPasswordHasher.Object, mockAppSettings.Object.Value);
+        }
+
+        private static RegisterUserRequest CreateRequestWithCorrectEmail(string password)
+        {
+            return new RegisterUserRequest
+            {
+                Email = "test@test.com",
+                Password = password
+            };
+        }
+
+        private static RegisterUserRequest CreateRequestWithCorrectPassword(string email)
+        {
+            return new RegisterUserRequest
+            {
+                Email = email,
+                Password = "Test123."
+            };
         }
 
         [Test]
@@ -63,6 +85,110 @@ namespace SYSTEMATIC.TESTS
 
             // Assert
             mockUserRepository.Verify(x => x.AddAsync(It.Is<User>(u => u.EmailVerificationCodeExpireAt.Value.Date == DateTime.UtcNow.AddDays(7).Date)), Times.Once);
+        }
+
+        [Test]
+        public void Password_Valid_ShouldNotHaveValidationError()
+        {
+            // Arrange
+            var request = CreateRequestWithCorrectPassword("test@test.com");
+
+            // Act
+            var result = _registerUserRequestValidator.TestValidate(request);
+
+            // Assert
+            result.ShouldNotHaveValidationErrorFor(x => x.Password);
+        }
+
+        [Test]
+        public void Password_TooShort_ShouldHaveValidationError()
+        {
+            // Arrange 
+            var request = CreateRequestWithCorrectEmail("q1.A");
+
+            // Act
+            var result = _registerUserRequestValidator.TestValidate(request);
+
+            // Assert
+            result.ShouldHaveValidationErrorFor(x => x.Password);
+        }
+
+        [Test]
+        public void Password_NotContainsAtLeastOneDigit_ShouldHaveValidationError()
+        {
+            // Arrange 
+            var request = CreateRequestWithCorrectEmail("Test.!");
+
+            // Act
+            var result = _registerUserRequestValidator.TestValidate(request);
+
+            // Assert
+            result.ShouldHaveValidationErrorFor(x => x.Password);
+        }
+
+        [Test]
+        public void Password_NotContainsAtLeastOneUpperCase_ShouldHaveValidationError()
+        {
+            // Arrange 
+            var request = CreateRequestWithCorrectEmail("test1.");
+
+            // Act
+            var result = _registerUserRequestValidator.TestValidate(request);
+
+            // Assert
+            result.ShouldHaveValidationErrorFor(x => x.Password);
+        }
+
+        [Test]
+        public void Password_NotContainsAtLeastOneLowerCase_ShouldHaveValidationError()
+        {
+            // Arrange 
+            var request = CreateRequestWithCorrectEmail("TEST1.");
+
+            // Act
+            var result = _registerUserRequestValidator.TestValidate(request);
+
+            // Assert
+            result.ShouldHaveValidationErrorFor(x => x.Password);
+        }
+
+        [Test]
+        public void Password_NotContainsAtLeastOneSpecialCharacter_ShouldHaveValidationError()
+        {
+            // Arrange 
+            var request = CreateRequestWithCorrectEmail("Test12");
+
+            // Act
+            var result = _registerUserRequestValidator.TestValidate(request);
+
+            // Assert
+            result.ShouldHaveValidationErrorFor(x => x.Password);
+        }
+
+        [Test]
+        public void Email_Valid_ShouldNotHaveValidationError()
+        {
+            // Arrange
+            var request = CreateRequestWithCorrectEmail("Test123.");
+
+            // Act
+            var result = _registerUserRequestValidator.TestValidate(request);
+
+            // Assert
+            result.ShouldNotHaveValidationErrorFor(x => x.Email);
+        }
+
+        [Test]
+        public void Email_NotContainsAt_ShouldHaveValidationError()
+        {
+            // Arrange 
+            var request = CreateRequestWithCorrectPassword("Testwp.pl");
+
+            // Act
+            var result = _registerUserRequestValidator.TestValidate(request);
+
+            // Assert
+            result.ShouldHaveValidationErrorFor(x => x.Email);
         }
     }
 }
