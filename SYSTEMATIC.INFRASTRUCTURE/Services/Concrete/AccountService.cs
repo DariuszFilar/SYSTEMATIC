@@ -24,7 +24,8 @@ namespace SYSTEMATIC.INFRASTRUCTURE.Services
         {
             var newUser = new User()
             {
-                Email = request.Email
+                Email = request.Email,
+                EmialVerificationCodeSendedAt = DateTime.UtcNow
             };
 
             var salt = GenerateSalt();
