@@ -1,4 +1,5 @@
 ﻿using SYSTEMATIC.INFRASTRUCTURE.Requests;
+using SYSTEMATIC.INFRASTRUCTURE.Responses;
 
 namespace SYSTEMATIC.INFRASTRUCTURE.Services
 {
@@ -6,5 +7,6 @@ namespace SYSTEMATIC.INFRASTRUCTURE.Services
     {
         Task RegisterUserAsync(RegisterUserRequest request);
         Task<bool> VerifyEmailCodeAsync(VerifyEmailCodeRequest request);
+        Task<LoginUserResponse> LoginUserAsync(LoginUserRequest request);
     }
 }

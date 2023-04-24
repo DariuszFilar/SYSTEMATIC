@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using SYSTEMATIC.DB;
 
@@ -11,9 +12,10 @@ using SYSTEMATIC.DB;
 namespace SYSTEMATIC.DB.Migrations
 {
     [DbContext(typeof(SystematicDbContext))]
-    partial class SystematicDbContextModelSnapshot : ModelSnapshot
+    [Migration("20230424123125_DeletedPasswordSaltFromUserTable")]
+    partial class DeletedPasswordSaltFromUserTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
