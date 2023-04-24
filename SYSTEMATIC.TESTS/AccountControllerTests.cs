@@ -8,6 +8,7 @@ using SYSTEMATIC.INFRASTRUCTURE.Services;
 using SYSTEMATIC.INFRASTRUCTURE.Requests;
 using SYSTEMATIC.INFRASTRUCTURE.Validators;
 using FluentValidation.TestHelper;
+using SYSTEMATIC.API;
 
 namespace SYSTEMATIC.TESTS
 {
@@ -18,6 +19,7 @@ namespace SYSTEMATIC.TESTS
         private Mock<IOptions<AppSettings>> mockAppSettings;
         private AccountService accountService;
         private RegisterUserRequestValidator _registerUserRequestValidator;
+        private Mock<AuthenticationSettings> mockAuthenticationSettings;
 
         [SetUp]
         public void Setup()
@@ -25,6 +27,7 @@ namespace SYSTEMATIC.TESTS
             mockUserRepository = new Mock<IUserRepository>();
             mockPasswordHasher = new Mock<IPasswordHasher<User>>();
             mockAppSettings = new Mock<IOptions<AppSettings>>();
+            mockAuthenticationSettings = new Mock<AuthenticationSettings>();
             _registerUserRequestValidator = new RegisterUserRequestValidator();
 
             mockAppSettings.Setup(x => x.Value).Returns(new AppSettings
@@ -32,7 +35,7 @@ namespace SYSTEMATIC.TESTS
                 EmailVerificationCodeExpirationDays = 7
             });
 
-            accountService = new AccountService(mockUserRepository.Object, mockPasswordHasher.Object, mockAppSettings.Object.Value);
+            accountService = new AccountService(mockUserRepository.Object, mockPasswordHasher.Object, mockAppSettings.Object.Value, mockAuthenticationSettings.Object);
         }
 
         private static RegisterUserRequest CreateRequestWithCorrectEmail(string password)

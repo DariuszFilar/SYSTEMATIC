@@ -1,9 +1,14 @@
 ﻿using Microsoft.AspNetCore.Identity;
-using System.Security.Cryptography;
+using Microsoft.IdentityModel.Tokens;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using System.Text;
+using SYSTEMATIC.API;
 using SYSTEMATIC.DB.Entities;
 using SYSTEMATIC.INFRASTRUCTURE.Exceptions;
 using SYSTEMATIC.INFRASTRUCTURE.Repositories.Abstract;
 using SYSTEMATIC.INFRASTRUCTURE.Requests;
+using SYSTEMATIC.INFRASTRUCTURE.Responses;
 
 namespace SYSTEMATIC.INFRASTRUCTURE.Services
 {
@@ -12,13 +17,16 @@ namespace SYSTEMATIC.INFRASTRUCTURE.Services
         private readonly IUserRepository _userRepository;
         private readonly IPasswordHasher<User> _passwordHasher;
         private readonly AppSettings _appSettings;
+        private readonly AuthenticationSettings _authenticationSettings;
         public AccountService(IUserRepository userRepository,
             IPasswordHasher<User> passwordHasher,
-            AppSettings appSettings)
+            AppSettings appSettings,
+            AuthenticationSettings authenticationSettings)
         {
             _userRepository = userRepository;
             _passwordHasher = passwordHasher;
             _appSettings = appSettings;
+            _authenticationSettings = authenticationSettings;
         }
         public async Task RegisterUserAsync(RegisterUserRequest request)
         {
@@ -28,11 +36,9 @@ namespace SYSTEMATIC.INFRASTRUCTURE.Services
                 EmialVerificationCodeSendedAt = DateTime.UtcNow
             };
 
-            var salt = GenerateSalt();
-            var hashedPassword = HashPassword(request.Password, salt);
+            var hashedPassword = _passwordHasher.HashPassword(newUser, request.Password);
 
             newUser.PasswordHash = hashedPassword;
-            newUser.PasswordSalt = salt;
 
             var emailVerificationCode = GenerateEmailVerificationCode();
             newUser.EmailVerificationCode = emailVerificationCode;
@@ -41,17 +47,6 @@ namespace SYSTEMATIC.INFRASTRUCTURE.Services
             newUser.EmailVerificationCodeExpireAt = emailVerificationCodeExpireAt;
 
             await _userRepository.AddAsync(newUser);
-        }
-
-        private static string GenerateSalt()
-        {
-            var randomBytes = new byte[16];
-            using (var rng = RandomNumberGenerator.Create())
-            {
-                rng.GetBytes(randomBytes);
-            }
-
-            return Convert.ToBase64String(randomBytes);
         }
 
         public async Task<bool> VerifyEmailCodeAsync(VerifyEmailCodeRequest request)
@@ -71,15 +66,46 @@ namespace SYSTEMATIC.INFRASTRUCTURE.Services
             return true;
         }
 
-        private string HashPassword(string password, string salt)
-        {
-            return _passwordHasher.HashPassword(null, password + salt);
-        }
-
         private static string GenerateEmailVerificationCode()
         {
             var emailVerificationCode = Guid.NewGuid().ToString();
             return emailVerificationCode;
+        }
+
+        public async Task<LoginUserResponse> LoginUserAsync(LoginUserRequest request)
+        {
+            var user = await _userRepository.GetByEmailAsync(request.Email) ?? throw new BadRequestException("Invalid email or password.");
+
+            PasswordVerificationResult passwordVerificationResult = _passwordHasher.VerifyHashedPassword(user, user.PasswordHash, request.Password);
+
+            if (passwordVerificationResult == PasswordVerificationResult.Failed)
+            {
+                throw new BadRequestException("Invalid email or password.");
+            }
+
+            if (user.EmailVerificationCode != null)
+            {
+                throw new BadRequestException("Invalid email or password.");
+            }
+
+            var claims = new List<Claim>()
+            {
+                new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
+            };                       
+
+            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_authenticationSettings.JwtKey));
+            var cred = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+            var expires = DateTime.Now.AddDays(_authenticationSettings.JwtExpireDays);
+
+            var token = new JwtSecurityToken(_authenticationSettings.JwtIssuer,
+                _authenticationSettings.JwtIssuer,
+                claims,
+                expires: expires,
+                signingCredentials: cred);
+
+            var tokenHandler = new JwtSecurityTokenHandler().WriteToken(token).ToString();
+
+            return new LoginUserResponse { Token = tokenHandler };
         }
     }
 }

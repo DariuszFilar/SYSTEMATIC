@@ -18,10 +18,6 @@ namespace SYSTEMATIC.DB
             modelBuilder.Entity<User>()
                 .Property(u => u.PasswordHash)
                 .IsRequired();
-
-            modelBuilder.Entity<User>()
-                .Property(u => u.PasswordSalt)
-                .IsRequired();
         }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
