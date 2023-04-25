@@ -30,6 +30,12 @@ namespace SYSTEMATIC.INFRASTRUCTURE.Services
         }
         public async Task RegisterUserAsync(RegisterUserRequest request)
         {
+            User user = await _userRepository.GetByEmailAsync(request.Email);
+            if (user != null)
+            {
+                throw new BadRequestException("Invalid email or password.");
+            }
+
             var newUser = new User()
             {
                 Email = request.Email,
