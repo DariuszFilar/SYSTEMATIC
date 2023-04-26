@@ -6,11 +6,11 @@ using SYSTEMATIC.INFRASTRUCTURE.DTOs;
 
 namespace SYSTEMATIC.INFRASTRUCTURE.Services.Concrete
 {
-    public class MailService : IMailService
+    public class EmailService : IEmailService
     {
         private readonly SendGridSettings _settings;
 
-        public MailService(IOptions<SendGridSettings> settings)
+        public EmailService(IOptions<SendGridSettings> settings)
         {
             _settings = settings.Value;
         }

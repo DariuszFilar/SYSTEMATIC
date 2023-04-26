@@ -4,17 +4,17 @@ using SYSTEMATIC.INFRASTRUCTURE.Services.Abstract;
 
 namespace SYSTEMATIC.INFRASTRUCTURE.Managers.Concrete
 {
-    public class MailManager : IMailManager
+    public class EmailManager : IEmailManager
     {
-        private readonly IMailService _mailService;
-        public MailManager(IMailService mailService)
+        private readonly IEmailService _emailService;
+        public EmailManager(IEmailService emailService)
         {
-            _mailService = mailService;
+            _emailService = emailService;
         }
 
-        public async Task<bool> SendRegisterMail(EmailDataDto data, string verificationCode)
+        public async Task<bool> SendRegisterEmail(EmailDataDto data, string verificationCode)
         {
-            string resourcePath = @"../SYSTEMATIC.INFRASTRUCTURE/Resources/MailTemplates/RegisterMailTemplate.html";
+            string resourcePath = @"../SYSTEMATIC.INFRASTRUCTURE/Resources/EmailTemplates/RegisterEmailTemplate.html";
             string template = File.ReadAllText(resourcePath);
 
             data.Content = template;
@@ -22,15 +22,15 @@ namespace SYSTEMATIC.INFRASTRUCTURE.Managers.Concrete
             data.Subject = "Systematyczny - link aktywacyjny";
             data.Content = GetBasicData(data.Content);
 
-            await _mailService.SendEmailAsync(data);
+            await _emailService.SendEmailAsync(data);
             return true;
         }
 
         public string GetBasicData(string content)
         {
-            string headerPath = @"../SYSTEMATIC.INFRASTRUCTURE/Resources/MailTemplates/Partial/_header.html";
+            string headerPath = @"../SYSTEMATIC.INFRASTRUCTURE/Resources/EmailTemplates/Partial/_header.html";
             string header = File.ReadAllText(headerPath);
-            string footerPath = @"../SYSTEMATIC.INFRASTRUCTURE/Resources/MailTemplates/Partial/_footer.html";
+            string footerPath = @"../SYSTEMATIC.INFRASTRUCTURE/Resources/EmailTemplates/Partial/_footer.html";
             string footer = File.ReadAllText(footerPath);
 
             content = content.Replace("#HEADER#", header);

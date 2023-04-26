@@ -2,7 +2,7 @@
 
 namespace SYSTEMATIC.INFRASTRUCTURE.Services.Abstract
 {
-    public interface IMailService
+    public interface IEmailService
     {
         Task SendEmailAsync(EmailDataDto data);
     }
