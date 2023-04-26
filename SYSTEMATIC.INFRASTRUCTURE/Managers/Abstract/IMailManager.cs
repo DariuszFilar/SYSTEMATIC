@@ -3,9 +3,9 @@ using SYSTEMATIC.INFRASTRUCTURE.DTOs;
 
 namespace SYSTEMATIC.INFRASTRUCTURE.Managers.Abstract
 {
-    public interface IMailManager
+    public interface IEmailManager
     {
-        Task<bool> SendRegisterMail(EmailDataDto data, string verifyURL);
+        Task<bool> SendRegisterEmail(EmailDataDto data, string verifyURL);
         string GetBasicData(string content);
     }
 }

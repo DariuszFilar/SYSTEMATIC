@@ -22,7 +22,7 @@ namespace SYSTEMATIC.TESTS
         private AccountService accountService;
         private RegisterUserRequestValidator _registerUserRequestValidator;
         private Mock<AuthenticationSettings> mockAuthenticationSettings;
-        private Mock<IMailManager> mockMailManager;
+        private Mock<IEmailManager> mockEmailManager;
 
         [SetUp]
         public void Setup()
@@ -32,7 +32,7 @@ namespace SYSTEMATIC.TESTS
             mockAppSettings = new Mock<IOptions<AppSettings>>();
             mockAuthenticationSettings = new Mock<AuthenticationSettings>();
             _registerUserRequestValidator = new RegisterUserRequestValidator();
-            mockMailManager = new Mock<IMailManager>();
+            mockEmailManager = new Mock<IEmailManager>();
 
             mockAppSettings.Setup(x => x.Value).Returns(new AppSettings
             {
@@ -43,7 +43,7 @@ namespace SYSTEMATIC.TESTS
                 mockPasswordHasher.Object, 
                 mockAppSettings.Object.Value, 
                 mockAuthenticationSettings.Object,
-                mockMailManager.Object);
+                mockEmailManager.Object);
         }
 
         private static RegisterUserRequest CreateRequestWithCorrectEmail(string password)

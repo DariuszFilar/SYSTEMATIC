@@ -86,14 +86,14 @@ builder.Services.Configure<SendGridSettings>(options =>
     options.FromName = builder.Configuration.GetValue<string>("SendGrid:FromName");
     options.FromEmail = builder.Configuration.GetValue<string>("SendGrid:FromEmail");
 });
-builder.Services.AddTransient<IMailService, MailService>();
+builder.Services.AddTransient<IEmailService, EmailService>();
 
 builder.Services.AddOptions();
 builder.Services.Configure<AppSettings>(builder.Configuration.GetSection("AppSettings"));
 builder.Services.AddScoped(sp =>
     sp.GetRequiredService<IOptions<AppSettings>>().Value);
 
-builder.Services.AddTransient<IMailManager, MailManager>();
+builder.Services.AddTransient<IEmailManager, EmailManager>();
 builder.Services.AddTransient<IValidator<RegisterUserRequest>, RegisterUserRequestValidator>();
 builder.Services.AddScoped<IAccountService, AccountService>();
 builder.Services.AddScoped<ErrorHandlingMiddleware>();

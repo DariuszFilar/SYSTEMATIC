@@ -20,19 +20,19 @@ namespace SYSTEMATIC.INFRASTRUCTURE.Services
         private readonly IPasswordHasher<User> _passwordHasher;
         private readonly AppSettings _appSettings;
         private readonly AuthenticationSettings _authenticationSettings;
-        private readonly IMailManager _mailManager;
+        private readonly IEmailManager _emailManager;
 
         public AccountService(IUserRepository userRepository,
             IPasswordHasher<User> passwordHasher,
             AppSettings appSettings,
             AuthenticationSettings authenticationSettings,
-            IMailManager mailManager)
+            IEmailManager emailManager)
         {
             _userRepository = userRepository;
             _passwordHasher = passwordHasher;
             _appSettings = appSettings;
             _authenticationSettings = authenticationSettings;
-            _mailManager = mailManager;            
+            _emailManager = emailManager;            
         }
 
         public async Task RegisterUserAsync(RegisterUserRequest request)
@@ -52,14 +52,14 @@ namespace SYSTEMATIC.INFRASTRUCTURE.Services
             var hashedPassword = _passwordHasher.HashPassword(newUser, request.Password);
             newUser.PasswordHash = hashedPassword;
 
-            var mailVerificationCode = GenerateEmailVerificationCode();
-            newUser.EmailVerificationCode = mailVerificationCode;
+            var emailVerificationCode = GenerateEmailVerificationCode();
+            newUser.EmailVerificationCode = emailVerificationCode;
             EmailDataDto data = new()
             {
-                Content = mailVerificationCode,
+                Content = emailVerificationCode,
                 ToEmail = request.Email
             };
-            await _mailManager.SendRegisterMail(data, mailVerificationCode);
+            await _emailManager.SendRegisterEmail(data, emailVerificationCode);
 
             var emailVerificationCodeExpireAt = DateTime.UtcNow.AddDays(_appSettings.EmailVerificationCodeExpirationDays);
             newUser.EmailVerificationCodeExpireAt = emailVerificationCodeExpireAt;
