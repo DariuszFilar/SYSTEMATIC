@@ -11,6 +11,8 @@ using SYSTEMATIC.API.Handlers.Commands;
 using SYSTEMATIC.DB;
 using SYSTEMATIC.DB.Entities;
 using SYSTEMATIC.INFRASTRUCTURE;
+using SYSTEMATIC.INFRASTRUCTURE.Managers.Abstract;
+using SYSTEMATIC.INFRASTRUCTURE.Managers.Concrete;
 using SYSTEMATIC.INFRASTRUCTURE.Middleware;
 using SYSTEMATIC.INFRASTRUCTURE.Repositories.Abstract;
 using SYSTEMATIC.INFRASTRUCTURE.Repositories.Concrete;
@@ -91,6 +93,7 @@ builder.Services.Configure<AppSettings>(builder.Configuration.GetSection("AppSet
 builder.Services.AddScoped(sp =>
     sp.GetRequiredService<IOptions<AppSettings>>().Value);
 
+builder.Services.AddTransient<IMailManager, MailManager>();
 builder.Services.AddTransient<IValidator<RegisterUserRequest>, RegisterUserRequestValidator>();
 builder.Services.AddScoped<IAccountService, AccountService>();
 builder.Services.AddScoped<ErrorHandlingMiddleware>();

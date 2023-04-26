@@ -4,6 +4,6 @@ namespace SYSTEMATIC.INFRASTRUCTURE.Services.Abstract
 {
     public interface IMailService
     {
-        Task SendEmailAsync(EmailMessageDto message);
+        Task SendEmailAsync(EmailDataDto data);
     }
 }

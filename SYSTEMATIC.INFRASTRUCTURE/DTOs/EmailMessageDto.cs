@@ -1,6 +1,6 @@
 ﻿namespace SYSTEMATIC.INFRASTRUCTURE.DTOs
 {
-    public class EmailMessageDto
+    public class EmailDataDto
     {
         public string ToEmail { get; set; }
         public string Subject { get; set; }
