@@ -5,10 +5,12 @@ using System.Security.Claims;
 using System.Text;
 using SYSTEMATIC.API;
 using SYSTEMATIC.DB.Entities;
+using SYSTEMATIC.INFRASTRUCTURE.DTOs;
 using SYSTEMATIC.INFRASTRUCTURE.Exceptions;
 using SYSTEMATIC.INFRASTRUCTURE.Repositories.Abstract;
 using SYSTEMATIC.INFRASTRUCTURE.Requests;
 using SYSTEMATIC.INFRASTRUCTURE.Responses;
+using SYSTEMATIC.INFRASTRUCTURE.Services.Abstract;
 
 namespace SYSTEMATIC.INFRASTRUCTURE.Services
 {
@@ -18,18 +20,21 @@ namespace SYSTEMATIC.INFRASTRUCTURE.Services
         private readonly IPasswordHasher<User> _passwordHasher;
         private readonly AppSettings _appSettings;
         private readonly AuthenticationSettings _authenticationSettings;
+        private readonly IMailService _mailService;
         public AccountService(IUserRepository userRepository,
             IPasswordHasher<User> passwordHasher,
             AppSettings appSettings,
-            AuthenticationSettings authenticationSettings)
+            AuthenticationSettings authenticationSettings,
+            IMailService mailService)
         {
             _userRepository = userRepository;
             _passwordHasher = passwordHasher;
             _appSettings = appSettings;
             _authenticationSettings = authenticationSettings;
+            _mailService = mailService;
         }
         public async Task RegisterUserAsync(RegisterUserRequest request)
-        {
+        {                       
             User user = await _userRepository.GetByEmailAsync(request.Email);
             if (user != null)
             {
@@ -43,11 +48,17 @@ namespace SYSTEMATIC.INFRASTRUCTURE.Services
             };
 
             var hashedPassword = _passwordHasher.HashPassword(newUser, request.Password);
-
             newUser.PasswordHash = hashedPassword;
 
             var emailVerificationCode = GenerateEmailVerificationCode();
             newUser.EmailVerificationCode = emailVerificationCode;
+            EmailMessageDto mailBody = new()
+            {
+                Content = emailVerificationCode,
+                Subject = "Systematyczny - link aktywacyjny",
+                ToEmail = request.Email
+            };
+            await _mailService.SendEmailAsync(mailBody);
 
             var emailVerificationCodeExpireAt = DateTime.UtcNow.AddDays(_appSettings.EmailVerificationCodeExpirationDays);
             newUser.EmailVerificationCodeExpireAt = emailVerificationCodeExpireAt;
@@ -97,7 +108,7 @@ namespace SYSTEMATIC.INFRASTRUCTURE.Services
             var claims = new List<Claim>()
             {
                 new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
-            };                       
+            };
 
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_authenticationSettings.JwtKey));
             var cred = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
