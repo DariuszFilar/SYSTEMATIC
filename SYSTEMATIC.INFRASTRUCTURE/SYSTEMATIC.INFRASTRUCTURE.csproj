@@ -17,8 +17,4 @@
     <ProjectReference Include="..\SYSTEMATIC.DB\SYSTEMATIC.DB.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Resources\MailTemplates\" />
-  </ItemGroup>
-
 </Project>

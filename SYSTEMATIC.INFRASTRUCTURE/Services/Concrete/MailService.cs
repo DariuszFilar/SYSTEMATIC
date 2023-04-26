@@ -15,16 +15,16 @@ namespace SYSTEMATIC.INFRASTRUCTURE.Services.Concrete
             _settings = settings.Value;
         }
 
-        public async Task SendEmailAsync(EmailMessageDto message)
+        public async Task SendEmailAsync(EmailDataDto data)
         {
             var client = new SendGridClient(_settings.ApiKey);
             var msg = new SendGridMessage()
             {
                 From = new EmailAddress(_settings.FromEmail, _settings.FromName),
-                Subject = message.Subject,
-                HtmlContent = message.Content
+                Subject = data.Subject,
+                HtmlContent = data.Content
             };
-            msg.AddTo(new EmailAddress(message.ToEmail));
+            msg.AddTo(new EmailAddress(data.ToEmail));
             var response = await client.SendEmailAsync(msg);
         }
     }

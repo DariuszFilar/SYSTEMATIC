@@ -7,10 +7,10 @@ using SYSTEMATIC.API;
 using SYSTEMATIC.DB.Entities;
 using SYSTEMATIC.INFRASTRUCTURE.DTOs;
 using SYSTEMATIC.INFRASTRUCTURE.Exceptions;
+using SYSTEMATIC.INFRASTRUCTURE.Managers.Abstract;
 using SYSTEMATIC.INFRASTRUCTURE.Repositories.Abstract;
 using SYSTEMATIC.INFRASTRUCTURE.Requests;
 using SYSTEMATIC.INFRASTRUCTURE.Responses;
-using SYSTEMATIC.INFRASTRUCTURE.Services.Abstract;
 
 namespace SYSTEMATIC.INFRASTRUCTURE.Services
 {
@@ -20,19 +20,21 @@ namespace SYSTEMATIC.INFRASTRUCTURE.Services
         private readonly IPasswordHasher<User> _passwordHasher;
         private readonly AppSettings _appSettings;
         private readonly AuthenticationSettings _authenticationSettings;
-        private readonly IMailService _mailService;
+        private readonly IMailManager _mailManager;
+
         public AccountService(IUserRepository userRepository,
             IPasswordHasher<User> passwordHasher,
             AppSettings appSettings,
             AuthenticationSettings authenticationSettings,
-            IMailService mailService)
+            IMailManager mailManager)
         {
             _userRepository = userRepository;
             _passwordHasher = passwordHasher;
             _appSettings = appSettings;
             _authenticationSettings = authenticationSettings;
-            _mailService = mailService;
+            _mailManager = mailManager;            
         }
+
         public async Task RegisterUserAsync(RegisterUserRequest request)
         {                       
             User user = await _userRepository.GetByEmailAsync(request.Email);
@@ -52,13 +54,12 @@ namespace SYSTEMATIC.INFRASTRUCTURE.Services
 
             var emailVerificationCode = GenerateEmailVerificationCode();
             newUser.EmailVerificationCode = emailVerificationCode;
-            EmailMessageDto mailBody = new()
+            EmailDataDto data = new()
             {
                 Content = emailVerificationCode,
-                Subject = "Systematyczny - link aktywacyjny",
                 ToEmail = request.Email
             };
-            await _mailService.SendEmailAsync(mailBody);
+            await _mailManager.SendRegisterMail(data, emailVerificationCode);
 
             var emailVerificationCodeExpireAt = DateTime.UtcNow.AddDays(_appSettings.EmailVerificationCodeExpirationDays);
             newUser.EmailVerificationCodeExpireAt = emailVerificationCodeExpireAt;
