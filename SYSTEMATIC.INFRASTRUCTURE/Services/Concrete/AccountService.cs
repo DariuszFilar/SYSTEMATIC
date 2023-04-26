@@ -52,14 +52,14 @@ namespace SYSTEMATIC.INFRASTRUCTURE.Services
             var hashedPassword = _passwordHasher.HashPassword(newUser, request.Password);
             newUser.PasswordHash = hashedPassword;
 
-            var emailVerificationCode = GenerateEmailVerificationCode();
-            newUser.EmailVerificationCode = emailVerificationCode;
+            var mailVerificationCode = GenerateEmailVerificationCode();
+            newUser.EmailVerificationCode = mailVerificationCode;
             EmailDataDto data = new()
             {
-                Content = emailVerificationCode,
+                Content = mailVerificationCode,
                 ToEmail = request.Email
             };
-            await _mailManager.SendRegisterMail(data, emailVerificationCode);
+            await _mailManager.SendRegisterMail(data, mailVerificationCode);
 
             var emailVerificationCodeExpireAt = DateTime.UtcNow.AddDays(_appSettings.EmailVerificationCodeExpirationDays);
             newUser.EmailVerificationCodeExpireAt = emailVerificationCodeExpireAt;
