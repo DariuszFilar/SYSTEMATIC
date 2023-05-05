@@ -22,5 +22,10 @@ namespace SYSTEMATIC.INFRASTRUCTURE.Repositories.Concrete
         {
             return await _context.Users.FirstOrDefaultAsync(u => u.EmailVerificationCode == verificationCode);
         }
+
+        public async Task<User> GetByIdAsync(long userId)
+        {
+            return await _context.Users.FirstOrDefaultAsync(u => u.Id == userId);
+        }
     }
 }

@@ -15,9 +15,9 @@ namespace SYSTEMATIC.API.Handlers.Commands
 
         public async Task<LoginUserResponse> Handle(LoginUserRequest request)
         {
-            await _accountService.LoginUserAsync(request);
+            var token = await _accountService.LoginUserAsync(request);
 
-            return new LoginUserResponse();
+            return new LoginUserResponse { Token = token.Token};
         }
     }
 }

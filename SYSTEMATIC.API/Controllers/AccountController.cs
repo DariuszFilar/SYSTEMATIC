@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 using SYSTEMATIC.API.Handlers.Commands;
 using SYSTEMATIC.INFRASTRUCTURE.Requests;
 using SYSTEMATIC.INFRASTRUCTURE.Responses;
@@ -12,14 +14,17 @@ namespace SYSTEMATIC.API.Controllers
         private readonly IRequestHandler<RegisterUserRequest, RegisterUserResponse> _registerHandler;
         private readonly IRequestHandler<VerifyEmailCodeRequest, VerifyEmailCodeResponse> _verifyEmailCodeHandler;
         private readonly IRequestHandler<LoginUserRequest, LoginUserResponse> _loginHandler;
+        private readonly IRequestWithUserIdHandler<ChangePasswordRequest, ChangePasswordResponse> _changePasswordHandler;
 
         public AccountController(IRequestHandler<RegisterUserRequest, RegisterUserResponse> registerHandler,
             IRequestHandler<VerifyEmailCodeRequest, VerifyEmailCodeResponse> verifyEmailCodeHandler,
-            IRequestHandler<LoginUserRequest, LoginUserResponse> loginHandler)
+            IRequestHandler<LoginUserRequest, LoginUserResponse> loginHandler,
+            IRequestWithUserIdHandler<ChangePasswordRequest, ChangePasswordResponse> changePasswordHandler)
         {
             _registerHandler = registerHandler;
             _verifyEmailCodeHandler = verifyEmailCodeHandler;
             _loginHandler = loginHandler;
+            _changePasswordHandler = changePasswordHandler;
         }
 
         [HttpPost("register")]
@@ -45,6 +50,15 @@ namespace SYSTEMATIC.API.Controllers
         public async Task<IActionResult> Login(LoginUserRequest request)
         {
             var response = await _loginHandler.Handle(request);
+            return Ok(response);
+        }
+
+        [Authorize]
+        [HttpPost("changePassword")]
+        public async Task<IActionResult> ChangePasswordPassword(ChangePasswordRequest request)
+        {
+            long userId = long.Parse(User.FindFirst(c => c.Type == ClaimTypes.NameIdentifier).Value);
+            var response = await _changePasswordHandler.Handle(request, userId);
             return Ok(response);
         }
     }

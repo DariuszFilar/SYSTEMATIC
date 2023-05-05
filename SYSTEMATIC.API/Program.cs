@@ -100,6 +100,7 @@ builder.Services.AddScoped<ErrorHandlingMiddleware>();
 builder.Services.AddScoped<IRequestHandler<RegisterUserRequest, RegisterUserResponse>, RegisterUserHandler>();
 builder.Services.AddScoped<IRequestHandler<VerifyEmailCodeRequest, VerifyEmailCodeResponse>, VerifyEmailCodeHandler>();
 builder.Services.AddScoped<IRequestHandler<LoginUserRequest, LoginUserResponse>, LoginUserHandler>();
+builder.Services.AddScoped<IRequestWithUserIdHandler<ChangePasswordRequest, ChangePasswordResponse>, ChangePasswordHandler>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 
 builder.Services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
