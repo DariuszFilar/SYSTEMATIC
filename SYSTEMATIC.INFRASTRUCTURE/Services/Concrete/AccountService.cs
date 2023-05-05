@@ -94,17 +94,7 @@ namespace SYSTEMATIC.INFRASTRUCTURE.Services
         {
             var user = await _userRepository.GetByEmailAsync(request.Email) ?? throw new BadRequestException("Invalid email or password.");
 
-            PasswordVerificationResult passwordVerificationResult = _passwordHasher.VerifyHashedPassword(user, user.PasswordHash, request.Password);
-
-            if (passwordVerificationResult == PasswordVerificationResult.Failed)
-            {
-                throw new BadRequestException("Invalid email or password.");
-            }
-
-            if (user.EmailVerificationCode != null)
-            {
-                throw new BadRequestException("Invalid email or password.");
-            }
+            CheckIfPasswordIsCorrect(user, request.Password);
 
             var claims = new List<Claim>()
             {
@@ -124,6 +114,34 @@ namespace SYSTEMATIC.INFRASTRUCTURE.Services
             var tokenHandler = new JwtSecurityTokenHandler().WriteToken(token).ToString();
 
             return new LoginUserResponse { Token = tokenHandler };
+        }
+
+        public async Task<ChangePasswordResponse> ChangePasswordAsync(ChangePasswordRequest request, long userId)
+        {
+            var user = await _userRepository.GetByIdAsync(userId);
+
+            CheckIfPasswordIsCorrect(user, request.OldPassword);
+
+            var hashedPassword = _passwordHasher.HashPassword(user, request.NewPassword);
+            user.PasswordHash = hashedPassword;
+            await _userRepository.UpdateAsync(user);
+
+            return new ChangePasswordResponse();
+        }
+
+        private void CheckIfPasswordIsCorrect(User user, string password)
+        {
+            PasswordVerificationResult passwordVerificationResult = _passwordHasher.VerifyHashedPassword(user, user.PasswordHash, password);
+
+            if (passwordVerificationResult == PasswordVerificationResult.Failed)
+            {
+                throw new BadRequestException("Invalid email or password.");
+            }
+
+            if (user.EmailVerificationCode != null)
+            {
+                throw new BadRequestException("Invalid email or password.");
+            }
         }
     }
 }

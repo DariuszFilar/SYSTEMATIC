@@ -9,7 +9,6 @@ using SYSTEMATIC.INFRASTRUCTURE.Requests;
 using SYSTEMATIC.INFRASTRUCTURE.Validators;
 using FluentValidation.TestHelper;
 using SYSTEMATIC.API;
-using SYSTEMATIC.INFRASTRUCTURE.Services.Abstract;
 using SYSTEMATIC.INFRASTRUCTURE.Managers.Abstract;
 
 namespace SYSTEMATIC.TESTS
