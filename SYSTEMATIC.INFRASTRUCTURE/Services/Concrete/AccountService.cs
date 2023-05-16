@@ -82,6 +82,101 @@ namespace SYSTEMATIC.INFRASTRUCTURE.Services
             await _userRepository.UpdateAsync(user);
 
             return true;
+        }               
+
+        public async Task<LoginUserResponse> LoginUserAsync(LoginUserRequest request)
+        {
+            var user = await _userRepository.GetByEmailAsync(request.Email) ?? throw new BadRequestException("Invalid email or password.");
+
+            CheckIfPasswordIsCorrect(user, request.Password);
+
+            var token = GenerateJwtToken(user);
+
+            var newRefreshToken = await GenerateAndSaveRefreshTokenAsync(user);  
+
+            return new LoginUserResponse { Token = token, RefreshToken = newRefreshToken };
+        }
+
+        public async Task<ChangePasswordResponse> ChangePasswordAsync(ChangePasswordRequest request, long userId)
+        {
+            var user = await _userRepository.GetByIdAsync(userId);
+
+            CheckIfPasswordIsCorrect(user, request.OldPassword);
+
+            var hashedPassword = _passwordHasher.HashPassword(user, request.NewPassword);
+            user.PasswordHash = hashedPassword;
+            await _userRepository.UpdateAsync(user);
+
+            return new ChangePasswordResponse();
+        }
+
+        public async Task<(string, string)> RefreshTokenAsync(string refreshToken)
+        {
+            User user = await _userRepository.GetByRefreshTokenAsync(refreshToken);
+
+            if (user == null)
+            {
+                throw new BadRequestException("Invalid refresh token.");
+            }
+
+            var tokenHandler = new JwtSecurityTokenHandler();
+            var validationParameters = new TokenValidationParameters
+            {
+                ValidateIssuerSigningKey = true,
+                IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_authenticationSettings.JwtKey)),
+                ValidateIssuer = true,
+                ValidIssuer = _authenticationSettings.JwtIssuer,
+                ValidateAudience = true,
+                ValidAudience = _authenticationSettings.JwtIssuer,
+                ClockSkew = TimeSpan.Zero
+            };
+
+            try
+            {
+                SecurityToken validatedToken;
+                var principal = tokenHandler.ValidateToken(refreshToken, validationParameters, out validatedToken);
+
+                var newAccessToken = GenerateJwtToken(user);
+                var newRefreshToken = await GenerateAndSaveRefreshTokenAsync(user);
+
+                return (newAccessToken, newRefreshToken);
+            }
+            catch (SecurityTokenExpiredException)
+            {
+                throw new BadRequestException("Token has expired.");
+            }
+            catch (SecurityTokenInvalidSignatureException)
+            {
+                throw new BadRequestException("Invalid token signature.");
+            }
+            catch (SecurityTokenValidationException)
+            {
+                throw new BadRequestException("Invalid token.");
+            }                       
+        }
+
+        private void CheckIfPasswordIsCorrect(User user, string password)
+        {
+            PasswordVerificationResult passwordVerificationResult = _passwordHasher.VerifyHashedPassword(user, user.PasswordHash, password);
+
+            if (passwordVerificationResult == PasswordVerificationResult.Failed)
+            {
+                throw new BadRequestException("Invalid email or password.");
+            }
+
+            if (user.EmailVerificationCode != null)
+            {
+                throw new BadRequestException("Invalid email or password.");
+            }
+        }           
+       
+        private async Task<string> GenerateAndSaveRefreshTokenAsync(User user)
+        {
+            var newRefreshToken = Guid.NewGuid().ToString();
+            user.RefreshToken = newRefreshToken;
+            await _userRepository.UpdateAsync(user);
+
+            return Guid.NewGuid().ToString();
         }
 
         private static string GenerateEmailVerificationCode()
@@ -90,12 +185,8 @@ namespace SYSTEMATIC.INFRASTRUCTURE.Services
             return emailVerificationCode;
         }
 
-        public async Task<LoginUserResponse> LoginUserAsync(LoginUserRequest request)
+        private string GenerateJwtToken(User user)
         {
-            var user = await _userRepository.GetByEmailAsync(request.Email) ?? throw new BadRequestException("Invalid email or password.");
-
-            CheckIfPasswordIsCorrect(user, request.Password);
-
             var claims = new List<Claim>()
             {
                 new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
@@ -113,35 +204,7 @@ namespace SYSTEMATIC.INFRASTRUCTURE.Services
 
             var tokenHandler = new JwtSecurityTokenHandler().WriteToken(token).ToString();
 
-            return new LoginUserResponse { Token = tokenHandler };
-        }
-
-        public async Task<ChangePasswordResponse> ChangePasswordAsync(ChangePasswordRequest request, long userId)
-        {
-            var user = await _userRepository.GetByIdAsync(userId);
-
-            CheckIfPasswordIsCorrect(user, request.OldPassword);
-
-            var hashedPassword = _passwordHasher.HashPassword(user, request.NewPassword);
-            user.PasswordHash = hashedPassword;
-            await _userRepository.UpdateAsync(user);
-
-            return new ChangePasswordResponse();
-        }
-
-        private void CheckIfPasswordIsCorrect(User user, string password)
-        {
-            PasswordVerificationResult passwordVerificationResult = _passwordHasher.VerifyHashedPassword(user, user.PasswordHash, password);
-
-            if (passwordVerificationResult == PasswordVerificationResult.Failed)
-            {
-                throw new BadRequestException("Invalid email or password.");
-            }
-
-            if (user.EmailVerificationCode != null)
-            {
-                throw new BadRequestException("Invalid email or password.");
-            }
+            return tokenHandler;
         }
     }
 }

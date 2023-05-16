@@ -27,5 +27,10 @@ namespace SYSTEMATIC.INFRASTRUCTURE.Repositories.Concrete
         {
             return await _context.Users.FirstOrDefaultAsync(u => u.Id == userId);
         }
+
+        public async Task<User> GetByRefreshTokenAsync(string refreshToken)
+        {
+            return await _context.Users.FirstOrDefaultAsync(u => u.RefreshToken == refreshToken);
+        }
     }
 }
