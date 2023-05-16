@@ -1,6 +1,6 @@
 ﻿using SYSTEMATIC.INFRASTRUCTURE.Requests;
 using SYSTEMATIC.INFRASTRUCTURE.Responses;
-using SYSTEMATIC.INFRASTRUCTURE.Services;
+using SYSTEMATIC.INFRASTRUCTURE.Services.Abstract;
 
 namespace SYSTEMATIC.API.Handlers.Commands
 {
@@ -15,7 +15,7 @@ namespace SYSTEMATIC.API.Handlers.Commands
 
         public async Task<VerifyEmailCodeResponse> Handle(VerifyEmailCodeRequest request)
         {
-            await _accountService.VerifyEmailCodeAsync(request);
+            _ = await _accountService.VerifyEmailCodeAsync(request);
             return new VerifyEmailCodeResponse();
         }
     }

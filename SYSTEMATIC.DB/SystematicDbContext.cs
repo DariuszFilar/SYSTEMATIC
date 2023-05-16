@@ -5,24 +5,24 @@ namespace SYSTEMATIC.DB
 {
     public class SystematicDbContext : DbContext
     {
-        private string _connectionString =
+        private readonly string _connectionString =
             "Server=(localdb)\\mssqllocaldb;Database=SystematicDb;Trusted_Connection=True;";
         public DbSet<User> Users { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            modelBuilder.Entity<User>()
+            _ = modelBuilder.Entity<User>()
                 .Property(u => u.Email)
                 .IsRequired();
 
-            modelBuilder.Entity<User>()
+            _ = modelBuilder.Entity<User>()
                 .Property(u => u.PasswordHash)
                 .IsRequired();
         }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            optionsBuilder.UseSqlServer(_connectionString);
+            _ = optionsBuilder.UseSqlServer(_connectionString);
         }
     }
 }

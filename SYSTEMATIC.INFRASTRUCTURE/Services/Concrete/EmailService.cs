@@ -1,8 +1,8 @@
 ﻿using Microsoft.Extensions.Options;
-using SendGrid.Helpers.Mail;
 using SendGrid;
-using SYSTEMATIC.INFRASTRUCTURE.Services.Abstract;
+using SendGrid.Helpers.Mail;
 using SYSTEMATIC.INFRASTRUCTURE.DTOs;
+using SYSTEMATIC.INFRASTRUCTURE.Services.Abstract;
 
 namespace SYSTEMATIC.INFRASTRUCTURE.Services.Concrete
 {
@@ -17,15 +17,15 @@ namespace SYSTEMATIC.INFRASTRUCTURE.Services.Concrete
 
         public async Task SendEmailAsync(EmailDataDto data)
         {
-            var client = new SendGridClient(_settings.ApiKey);
-            var msg = new SendGridMessage()
+            SendGridClient client = new(_settings.ApiKey);
+            SendGridMessage msg = new()
             {
                 From = new EmailAddress(_settings.FromEmail, _settings.FromName),
                 Subject = data.Subject,
                 HtmlContent = data.Content
             };
             msg.AddTo(new EmailAddress(data.ToEmail));
-            var response = await client.SendEmailAsync(msg);
+            _ = await client.SendEmailAsync(msg);
         }
     }
 }

@@ -1,5 +1,4 @@
-﻿using System.Net.NetworkInformation;
-using SYSTEMATIC.INFRASTRUCTURE.DTOs;
+﻿using SYSTEMATIC.INFRASTRUCTURE.DTOs;
 
 namespace SYSTEMATIC.INFRASTRUCTURE.Managers.Abstract
 {

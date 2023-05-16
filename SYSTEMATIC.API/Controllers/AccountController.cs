@@ -30,26 +30,26 @@ namespace SYSTEMATIC.API.Controllers
         [HttpPost("register")]
         public async Task<IActionResult> Register(RegisterUserRequest request)
         {
-            var response = await _registerHandler.Handle(request);
+            RegisterUserResponse response = await _registerHandler.Handle(request);
             return Ok(response);
         }
 
         [HttpPost("verify-email/{verificationCode}")]
         public async Task<IActionResult> VerifyEmail([FromRoute] string verificationCode)
         {
-            var request = new VerifyEmailCodeRequest
+            VerifyEmailCodeRequest request = new()
             {
                 EmailVerificationCode = verificationCode
             };
 
-            var response = await _verifyEmailCodeHandler.Handle(request);
+            VerifyEmailCodeResponse response = await _verifyEmailCodeHandler.Handle(request);
             return Ok(response);
         }
 
         [HttpPost("login")]
         public async Task<IActionResult> Login(LoginUserRequest request)
         {
-            var response = await _loginHandler.Handle(request);
+            LoginUserResponse response = await _loginHandler.Handle(request);
             return Ok(response);
         }
 
@@ -58,7 +58,7 @@ namespace SYSTEMATIC.API.Controllers
         public async Task<IActionResult> ChangePasswordPassword(ChangePasswordRequest request)
         {
             long userId = long.Parse(User.FindFirst(c => c.Type == ClaimTypes.NameIdentifier).Value);
-            var response = await _changePasswordHandler.Handle(request, userId);
+            ChangePasswordResponse response = await _changePasswordHandler.Handle(request, userId);
             return Ok(response);
         }
     }

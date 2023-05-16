@@ -1,15 +1,14 @@
+using FluentValidation.TestHelper;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Options;
 using Moq;
 using SYSTEMATIC.DB.Entities;
-using SYSTEMATIC.INFRASTRUCTURE.Repositories.Abstract;
 using SYSTEMATIC.INFRASTRUCTURE;
-using SYSTEMATIC.INFRASTRUCTURE.Services;
-using SYSTEMATIC.INFRASTRUCTURE.Requests;
-using SYSTEMATIC.INFRASTRUCTURE.Validators;
-using FluentValidation.TestHelper;
-using SYSTEMATIC.API;
 using SYSTEMATIC.INFRASTRUCTURE.Managers.Abstract;
+using SYSTEMATIC.INFRASTRUCTURE.Repositories.Abstract;
+using SYSTEMATIC.INFRASTRUCTURE.Requests;
+using SYSTEMATIC.INFRASTRUCTURE.Services.Concrete;
+using SYSTEMATIC.INFRASTRUCTURE.Validators;
 
 namespace SYSTEMATIC.TESTS
 {
@@ -33,14 +32,14 @@ namespace SYSTEMATIC.TESTS
             _registerUserRequestValidator = new RegisterUserRequestValidator();
             mockEmailManager = new Mock<IEmailManager>();
 
-            mockAppSettings.Setup(x => x.Value).Returns(new AppSettings
+            _ = mockAppSettings.Setup(x => x.Value).Returns(new AppSettings
             {
                 EmailVerificationCodeExpirationDays = 7
             });
 
-            accountService = new AccountService(mockUserRepository.Object, 
-                mockPasswordHasher.Object, 
-                mockAppSettings.Object.Value, 
+            accountService = new AccountService(mockUserRepository.Object,
+                mockPasswordHasher.Object,
+                mockAppSettings.Object.Value,
                 mockAuthenticationSettings.Object,
                 mockEmailManager.Object);
         }
@@ -67,7 +66,7 @@ namespace SYSTEMATIC.TESTS
         public async Task RegisterUserAsync_ValidRequest_ShouldGenerateEmailVerificationCode()
         {
             // Arrange
-            var request = new RegisterUserRequest
+            RegisterUserRequest request = new()
             {
                 Email = "test@test.com",
                 Password = "Test123!"
@@ -84,7 +83,7 @@ namespace SYSTEMATIC.TESTS
         public async Task RegisterUserAsync_ValidRequest_ShouldSetEmailVerificationCodeExpireAtTo7Days()
         {
             // Arrange
-            var request = new RegisterUserRequest
+            RegisterUserRequest request = new()
             {
                 Email = "test@test.com",
                 Password = "Test123!"
@@ -101,10 +100,10 @@ namespace SYSTEMATIC.TESTS
         public void Password_Valid_ShouldNotHaveValidationError()
         {
             // Arrange
-            var request = CreateRequestWithCorrectPassword("test@test.com");
+            RegisterUserRequest request = CreateRequestWithCorrectPassword("test@test.com");
 
             // Act
-            var result = _registerUserRequestValidator.TestValidate(request);
+            TestValidationResult<RegisterUserRequest> result = _registerUserRequestValidator.TestValidate(request);
 
             // Assert
             result.ShouldNotHaveValidationErrorFor(x => x.Password);
@@ -114,75 +113,75 @@ namespace SYSTEMATIC.TESTS
         public void Password_TooShort_ShouldHaveValidationError()
         {
             // Arrange 
-            var request = CreateRequestWithCorrectEmail("q1.A");
+            RegisterUserRequest request = CreateRequestWithCorrectEmail("q1.A");
 
             // Act
-            var result = _registerUserRequestValidator.TestValidate(request);
+            TestValidationResult<RegisterUserRequest> result = _registerUserRequestValidator.TestValidate(request);
 
             // Assert
-            result.ShouldHaveValidationErrorFor(x => x.Password);
+            _ = result.ShouldHaveValidationErrorFor(x => x.Password);
         }
 
         [Test]
         public void Password_NotContainsAtLeastOneDigit_ShouldHaveValidationError()
         {
             // Arrange 
-            var request = CreateRequestWithCorrectEmail("Test.!");
+            RegisterUserRequest request = CreateRequestWithCorrectEmail("Test.!");
 
             // Act
-            var result = _registerUserRequestValidator.TestValidate(request);
+            TestValidationResult<RegisterUserRequest> result = _registerUserRequestValidator.TestValidate(request);
 
             // Assert
-            result.ShouldHaveValidationErrorFor(x => x.Password);
+            _ = result.ShouldHaveValidationErrorFor(x => x.Password);
         }
 
         [Test]
         public void Password_NotContainsAtLeastOneUpperCase_ShouldHaveValidationError()
         {
             // Arrange 
-            var request = CreateRequestWithCorrectEmail("test1.");
+            RegisterUserRequest request = CreateRequestWithCorrectEmail("test1.");
 
             // Act
-            var result = _registerUserRequestValidator.TestValidate(request);
+            TestValidationResult<RegisterUserRequest> result = _registerUserRequestValidator.TestValidate(request);
 
             // Assert
-            result.ShouldHaveValidationErrorFor(x => x.Password);
+            _ = result.ShouldHaveValidationErrorFor(x => x.Password);
         }
 
         [Test]
         public void Password_NotContainsAtLeastOneLowerCase_ShouldHaveValidationError()
         {
             // Arrange 
-            var request = CreateRequestWithCorrectEmail("TEST1.");
+            RegisterUserRequest request = CreateRequestWithCorrectEmail("TEST1.");
 
             // Act
-            var result = _registerUserRequestValidator.TestValidate(request);
+            TestValidationResult<RegisterUserRequest> result = _registerUserRequestValidator.TestValidate(request);
 
             // Assert
-            result.ShouldHaveValidationErrorFor(x => x.Password);
+            _ = result.ShouldHaveValidationErrorFor(x => x.Password);
         }
 
         [Test]
         public void Password_NotContainsAtLeastOneSpecialCharacter_ShouldHaveValidationError()
         {
             // Arrange 
-            var request = CreateRequestWithCorrectEmail("Test12");
+            RegisterUserRequest request = CreateRequestWithCorrectEmail("Test12");
 
             // Act
-            var result = _registerUserRequestValidator.TestValidate(request);
+            TestValidationResult<RegisterUserRequest> result = _registerUserRequestValidator.TestValidate(request);
 
             // Assert
-            result.ShouldHaveValidationErrorFor(x => x.Password);
+            _ = result.ShouldHaveValidationErrorFor(x => x.Password);
         }
 
         [Test]
         public void Email_Valid_ShouldNotHaveValidationError()
         {
             // Arrange
-            var request = CreateRequestWithCorrectEmail("Test123.");
+            RegisterUserRequest request = CreateRequestWithCorrectEmail("Test123.");
 
             // Act
-            var result = _registerUserRequestValidator.TestValidate(request);
+            TestValidationResult<RegisterUserRequest> result = _registerUserRequestValidator.TestValidate(request);
 
             // Assert
             result.ShouldNotHaveValidationErrorFor(x => x.Email);
@@ -192,13 +191,13 @@ namespace SYSTEMATIC.TESTS
         public void Email_NotContainsAt_ShouldHaveValidationError()
         {
             // Arrange 
-            var request = CreateRequestWithCorrectPassword("Testwp.pl");
+            RegisterUserRequest request = CreateRequestWithCorrectPassword("Testwp.pl");
 
             // Act
-            var result = _registerUserRequestValidator.TestValidate(request);
+            TestValidationResult<RegisterUserRequest> result = _registerUserRequestValidator.TestValidate(request);
 
             // Assert
-            result.ShouldHaveValidationErrorFor(x => x.Email);
+            _ = result.ShouldHaveValidationErrorFor(x => x.Email);
         }
     }
 }

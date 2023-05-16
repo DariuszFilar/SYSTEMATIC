@@ -1,7 +1,6 @@
-﻿using SYSTEMATIC.DB.Entities;
-using SYSTEMATIC.INFRASTRUCTURE.Requests;
+﻿using SYSTEMATIC.INFRASTRUCTURE.Requests;
 using SYSTEMATIC.INFRASTRUCTURE.Responses;
-using SYSTEMATIC.INFRASTRUCTURE.Services;
+using SYSTEMATIC.INFRASTRUCTURE.Services.Abstract;
 
 namespace SYSTEMATIC.API.Handlers.Commands
 {
@@ -15,7 +14,7 @@ namespace SYSTEMATIC.API.Handlers.Commands
 
         public async Task<ChangePasswordResponse> Handle(ChangePasswordRequest request, long userId)
         {
-            await _accountService.ChangePasswordAsync(request, userId);
+            _ = await _accountService.ChangePasswordAsync(request, userId);
 
             return new ChangePasswordResponse();
         }

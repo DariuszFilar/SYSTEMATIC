@@ -1,5 +1,4 @@
-﻿using SYSTEMATIC.API.Handlers.Commands;
-using SYSTEMATIC.INFRASTRUCTURE.Responses;
+﻿using SYSTEMATIC.INFRASTRUCTURE.Responses;
 
 namespace SYSTEMATIC.INFRASTRUCTURE.Requests
 {
@@ -10,14 +9,14 @@ namespace SYSTEMATIC.INFRASTRUCTURE.Requests
 
         public string Email
         {
-            get { return _email; }
-            set { _email = value?.Trim(); }
+            get => _email;
+            set => _email = value?.Trim();
         }
 
         public string Password
         {
-            get { return _password; }
-            set { _password = value?.Trim(); }
+            get => _password;
+            set => _password = value?.Trim();
         }
     }
 }

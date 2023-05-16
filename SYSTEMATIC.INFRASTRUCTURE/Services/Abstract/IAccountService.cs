@@ -1,8 +1,7 @@
-﻿using SYSTEMATIC.DB.Entities;
-using SYSTEMATIC.INFRASTRUCTURE.Requests;
+﻿using SYSTEMATIC.INFRASTRUCTURE.Requests;
 using SYSTEMATIC.INFRASTRUCTURE.Responses;
 
-namespace SYSTEMATIC.INFRASTRUCTURE.Services
+namespace SYSTEMATIC.INFRASTRUCTURE.Services.Abstract
 {
     public interface IAccountService
     {

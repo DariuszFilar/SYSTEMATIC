@@ -3,7 +3,6 @@ using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
-using SYSTEMATIC.API;
 using SYSTEMATIC.DB.Entities;
 using SYSTEMATIC.INFRASTRUCTURE.DTOs;
 using SYSTEMATIC.INFRASTRUCTURE.Exceptions;
@@ -11,8 +10,9 @@ using SYSTEMATIC.INFRASTRUCTURE.Managers.Abstract;
 using SYSTEMATIC.INFRASTRUCTURE.Repositories.Abstract;
 using SYSTEMATIC.INFRASTRUCTURE.Requests;
 using SYSTEMATIC.INFRASTRUCTURE.Responses;
+using SYSTEMATIC.INFRASTRUCTURE.Services.Abstract;
 
-namespace SYSTEMATIC.INFRASTRUCTURE.Services
+namespace SYSTEMATIC.INFRASTRUCTURE.Services.Concrete
 {
     public class AccountService : IAccountService
     {
@@ -32,36 +32,36 @@ namespace SYSTEMATIC.INFRASTRUCTURE.Services
             _passwordHasher = passwordHasher;
             _appSettings = appSettings;
             _authenticationSettings = authenticationSettings;
-            _emailManager = emailManager;            
+            _emailManager = emailManager;
         }
 
         public async Task RegisterUserAsync(RegisterUserRequest request)
-        {                       
+        {
             User user = await _userRepository.GetByEmailAsync(request.Email);
             if (user != null)
             {
                 throw new BadRequestException("Invalid email or password.");
             }
 
-            var newUser = new User()
+            User newUser = new()
             {
                 Email = request.Email,
                 EmialVerificationCodeSendedAt = DateTime.UtcNow
             };
 
-            var hashedPassword = _passwordHasher.HashPassword(newUser, request.Password);
+            string hashedPassword = _passwordHasher.HashPassword(newUser, request.Password);
             newUser.PasswordHash = hashedPassword;
 
-            var emailVerificationCode = GenerateEmailVerificationCode();
+            string emailVerificationCode = GenerateEmailVerificationCode();
             newUser.EmailVerificationCode = emailVerificationCode;
             EmailDataDto data = new()
             {
                 Content = emailVerificationCode,
                 ToEmail = request.Email
             };
-            await _emailManager.SendRegisterEmail(data, emailVerificationCode);
+            _ = await _emailManager.SendRegisterEmail(data, emailVerificationCode);
 
-            var emailVerificationCodeExpireAt = DateTime.UtcNow.AddDays(_appSettings.EmailVerificationCodeExpirationDays);
+            DateTime emailVerificationCodeExpireAt = DateTime.UtcNow.AddDays(_appSettings.EmailVerificationCodeExpirationDays);
             newUser.EmailVerificationCodeExpireAt = emailVerificationCodeExpireAt;
 
             await _userRepository.AddAsync(newUser);
@@ -69,7 +69,7 @@ namespace SYSTEMATIC.INFRASTRUCTURE.Services
 
         public async Task<bool> VerifyEmailCodeAsync(VerifyEmailCodeRequest request)
         {
-            var user = await _userRepository.GetByEmailVerificationCodeAsync(request.EmailVerificationCode) ?? throw new NotFoundException("User not found");
+            User user = await _userRepository.GetByEmailVerificationCodeAsync(request.EmailVerificationCode) ?? throw new NotFoundException("User not found");
 
             if (user.EmailVerificationCodeExpireAt.Value <= DateTime.UtcNow)
             {
@@ -82,28 +82,28 @@ namespace SYSTEMATIC.INFRASTRUCTURE.Services
             await _userRepository.UpdateAsync(user);
 
             return true;
-        }               
+        }
 
         public async Task<LoginUserResponse> LoginUserAsync(LoginUserRequest request)
         {
-            var user = await _userRepository.GetByEmailAsync(request.Email) ?? throw new BadRequestException("Invalid email or password.");
+            User user = await _userRepository.GetByEmailAsync(request.Email) ?? throw new BadRequestException("Invalid email or password.");
 
             CheckIfPasswordIsCorrect(user, request.Password);
 
-            var token = GenerateJwtToken(user);
+            string token = GenerateJwtToken(user);
 
-            var newRefreshToken = await GenerateAndSaveRefreshTokenAsync(user);  
+            string newRefreshToken = await GenerateAndSaveRefreshTokenAsync(user);
 
             return new LoginUserResponse { Token = token, RefreshToken = newRefreshToken };
         }
 
         public async Task<ChangePasswordResponse> ChangePasswordAsync(ChangePasswordRequest request, long userId)
         {
-            var user = await _userRepository.GetByIdAsync(userId);
+            User user = await _userRepository.GetByIdAsync(userId);
 
             CheckIfPasswordIsCorrect(user, request.OldPassword);
 
-            var hashedPassword = _passwordHasher.HashPassword(user, request.NewPassword);
+            string hashedPassword = _passwordHasher.HashPassword(user, request.NewPassword);
             user.PasswordHash = hashedPassword;
             await _userRepository.UpdateAsync(user);
 
@@ -119,8 +119,8 @@ namespace SYSTEMATIC.INFRASTRUCTURE.Services
                 throw new BadRequestException("Invalid refresh token.");
             }
 
-            var tokenHandler = new JwtSecurityTokenHandler();
-            var validationParameters = new TokenValidationParameters
+            JwtSecurityTokenHandler tokenHandler = new();
+            TokenValidationParameters validationParameters = new()
             {
                 ValidateIssuerSigningKey = true,
                 IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_authenticationSettings.JwtKey)),
@@ -133,11 +133,10 @@ namespace SYSTEMATIC.INFRASTRUCTURE.Services
 
             try
             {
-                SecurityToken validatedToken;
-                var principal = tokenHandler.ValidateToken(refreshToken, validationParameters, out validatedToken);
+                ClaimsPrincipal principal = tokenHandler.ValidateToken(refreshToken, validationParameters, out SecurityToken validatedToken);
 
-                var newAccessToken = GenerateJwtToken(user);
-                var newRefreshToken = await GenerateAndSaveRefreshTokenAsync(user);
+                string newAccessToken = GenerateJwtToken(user);
+                string newRefreshToken = await GenerateAndSaveRefreshTokenAsync(user);
 
                 return (newAccessToken, newRefreshToken);
             }
@@ -152,7 +151,7 @@ namespace SYSTEMATIC.INFRASTRUCTURE.Services
             catch (SecurityTokenValidationException)
             {
                 throw new BadRequestException("Invalid token.");
-            }                       
+            }
         }
 
         private void CheckIfPasswordIsCorrect(User user, string password)
@@ -168,11 +167,11 @@ namespace SYSTEMATIC.INFRASTRUCTURE.Services
             {
                 throw new BadRequestException("Invalid email or password.");
             }
-        }           
-       
+        }
+
         private async Task<string> GenerateAndSaveRefreshTokenAsync(User user)
         {
-            var newRefreshToken = Guid.NewGuid().ToString();
+            string newRefreshToken = Guid.NewGuid().ToString();
             user.RefreshToken = newRefreshToken;
             await _userRepository.UpdateAsync(user);
 
@@ -181,28 +180,28 @@ namespace SYSTEMATIC.INFRASTRUCTURE.Services
 
         private static string GenerateEmailVerificationCode()
         {
-            var emailVerificationCode = Guid.NewGuid().ToString();
+            string emailVerificationCode = Guid.NewGuid().ToString();
             return emailVerificationCode;
         }
 
         private string GenerateJwtToken(User user)
         {
-            var claims = new List<Claim>()
+            List<Claim> claims = new()
             {
                 new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
             };
 
-            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_authenticationSettings.JwtKey));
-            var cred = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
-            var expires = DateTime.Now.AddDays(_authenticationSettings.JwtExpireDays);
+            SymmetricSecurityKey key = new(Encoding.UTF8.GetBytes(_authenticationSettings.JwtKey));
+            SigningCredentials cred = new(key, SecurityAlgorithms.HmacSha256);
+            DateTime expires = DateTime.Now.AddDays(_authenticationSettings.JwtExpireDays);
 
-            var token = new JwtSecurityToken(_authenticationSettings.JwtIssuer,
+            JwtSecurityToken token = new(_authenticationSettings.JwtIssuer,
                 _authenticationSettings.JwtIssuer,
                 claims,
                 expires: expires,
                 signingCredentials: cred);
 
-            var tokenHandler = new JwtSecurityTokenHandler().WriteToken(token).ToString();
+            string tokenHandler = new JwtSecurityTokenHandler().WriteToken(token).ToString();
 
             return tokenHandler;
         }

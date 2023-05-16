@@ -1,4 +1,4 @@
-﻿namespace SYSTEMATIC.API
+﻿namespace SYSTEMATIC.INFRASTRUCTURE
 {
     public class AuthenticationSettings
     {
