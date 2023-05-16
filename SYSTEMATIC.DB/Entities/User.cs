@@ -9,5 +9,6 @@
         public string EmailVerificationCode { get; set; }
         public DateTime? EmailVerificationCodeExpireAt { get; set; }
         public DateTime EmialVerificationCodeSendedAt { get; set; }
+        public string RefreshToken { get; set; }
     }
 }
