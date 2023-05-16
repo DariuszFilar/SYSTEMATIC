@@ -1,6 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore.Migrations;
 
-#nullable disable
 
 namespace SYSTEMATIC.DB.Migrations
 {
@@ -8,7 +7,7 @@ namespace SYSTEMATIC.DB.Migrations
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.CreateTable(
+            _ = migrationBuilder.CreateTable(
                 name: "Users",
                 columns: table => new
                 {
@@ -21,13 +20,13 @@ namespace SYSTEMATIC.DB.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Users", x => x.Id);
+                    _ = table.PrimaryKey("PK_Users", x => x.Id);
                 });
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropTable(
+            _ = migrationBuilder.DropTable(
                 name: "Users");
         }
     }

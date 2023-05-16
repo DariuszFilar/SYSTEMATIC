@@ -1,6 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore.Migrations;
 
-#nullable disable
 
 namespace SYSTEMATIC.DB.Migrations
 {
@@ -8,14 +7,14 @@ namespace SYSTEMATIC.DB.Migrations
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropColumn(
+            _ = migrationBuilder.DropColumn(
                 name: "PasswordSalt",
                 table: "Users");
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.AddColumn<string>(
+            _ = migrationBuilder.AddColumn<string>(
                 name: "PasswordSalt",
                 table: "Users",
                 type: "nvarchar(max)",

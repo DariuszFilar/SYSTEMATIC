@@ -1,6 +1,6 @@
 ﻿using SYSTEMATIC.INFRASTRUCTURE.Requests;
 using SYSTEMATIC.INFRASTRUCTURE.Responses;
-using SYSTEMATIC.INFRASTRUCTURE.Services;
+using SYSTEMATIC.INFRASTRUCTURE.Services.Abstract;
 
 namespace SYSTEMATIC.API.Handlers.Commands
 {
@@ -15,9 +15,9 @@ namespace SYSTEMATIC.API.Handlers.Commands
 
         public async Task<LoginUserResponse> Handle(LoginUserRequest request)
         {
-            var loginResponse = await _accountService.LoginUserAsync(request);
+            LoginUserResponse loginResponse = await _accountService.LoginUserAsync(request);
 
-            return new LoginUserResponse { Token = loginResponse.Token, RefreshToken = loginResponse.RefreshToken};
+            return new LoginUserResponse { Token = loginResponse.Token, RefreshToken = loginResponse.RefreshToken };
         }
     }
 }

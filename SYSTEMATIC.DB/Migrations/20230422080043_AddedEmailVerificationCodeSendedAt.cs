@@ -1,7 +1,5 @@
-﻿using System;
-using Microsoft.EntityFrameworkCore.Migrations;
+﻿using Microsoft.EntityFrameworkCore.Migrations;
 
-#nullable disable
 
 namespace SYSTEMATIC.DB.Migrations
 {
@@ -9,7 +7,7 @@ namespace SYSTEMATIC.DB.Migrations
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.AddColumn<DateTime>(
+            _ = migrationBuilder.AddColumn<DateTime>(
                 name: "EmialVerificationCodeSendedAt",
                 table: "Users",
                 type: "datetime2",
@@ -19,7 +17,7 @@ namespace SYSTEMATIC.DB.Migrations
 
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropColumn(
+            _ = migrationBuilder.DropColumn(
                 name: "EmialVerificationCodeSendedAt",
                 table: "Users");
         }

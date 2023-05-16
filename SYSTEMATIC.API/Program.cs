@@ -1,12 +1,10 @@
 using FluentValidation;
 using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using System.Text;
-using SYSTEMATIC.API;
 using SYSTEMATIC.API.Handlers.Commands;
 using SYSTEMATIC.DB;
 using SYSTEMATIC.DB.Entities;
@@ -18,16 +16,15 @@ using SYSTEMATIC.INFRASTRUCTURE.Repositories.Abstract;
 using SYSTEMATIC.INFRASTRUCTURE.Repositories.Concrete;
 using SYSTEMATIC.INFRASTRUCTURE.Requests;
 using SYSTEMATIC.INFRASTRUCTURE.Responses;
-using SYSTEMATIC.INFRASTRUCTURE.Services;
 using SYSTEMATIC.INFRASTRUCTURE.Services.Abstract;
 using SYSTEMATIC.INFRASTRUCTURE.Services.Concrete;
 using SYSTEMATIC.INFRASTRUCTURE.Validators;
 
-var builder = WebApplication.CreateBuilder(args);
+WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 
-var authenticationSettings = new AuthenticationSettings();
+AuthenticationSettings authenticationSettings = new();
 
 builder.Configuration.GetSection("Authentication").Bind(authenticationSettings);
 
@@ -105,7 +102,7 @@ builder.Services.AddScoped<IUserRepository, UserRepository>();
 
 builder.Services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
 
-var app = builder.Build();
+WebApplication app = builder.Build();
 
 app.UseMiddleware<ErrorHandlingMiddleware>();
 // Configure the HTTP request pipeline.

@@ -1,6 +1,4 @@
-﻿using SYSTEMATIC.DB.Entities;
-
-namespace SYSTEMATIC.API.Handlers.Commands
+﻿namespace SYSTEMATIC.API.Handlers.Commands
 {
     public interface IRequestWithUserIdHandler<in TRequest, TResponse>
     {

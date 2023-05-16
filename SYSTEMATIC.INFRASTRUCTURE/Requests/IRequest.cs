@@ -1,4 +1,4 @@
-﻿namespace SYSTEMATIC.API.Handlers.Commands
+﻿namespace SYSTEMATIC.INFRASTRUCTURE.Requests
 {
     public interface IRequest<TResponse>
     {

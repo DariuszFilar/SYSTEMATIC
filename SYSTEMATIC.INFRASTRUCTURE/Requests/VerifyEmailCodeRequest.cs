@@ -1,5 +1,4 @@
-﻿using SYSTEMATIC.API.Handlers.Commands;
-using SYSTEMATIC.INFRASTRUCTURE.Responses;
+﻿using SYSTEMATIC.INFRASTRUCTURE.Responses;
 
 namespace SYSTEMATIC.INFRASTRUCTURE.Requests
 {

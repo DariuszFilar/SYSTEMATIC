@@ -1,6 +1,6 @@
 ﻿using SYSTEMATIC.INFRASTRUCTURE.Requests;
 using SYSTEMATIC.INFRASTRUCTURE.Responses;
-using SYSTEMATIC.INFRASTRUCTURE.Services;
+using SYSTEMATIC.INFRASTRUCTURE.Services.Abstract;
 
 namespace SYSTEMATIC.API.Handlers.Commands
 {
